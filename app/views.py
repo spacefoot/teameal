@@ -17,7 +17,7 @@ def index(request):
     for user in users:
         user.nb_meals = Meal.objects.filter(user=user).count()
         user.payments = UserPayment.objects.filter(user=user).aggregate(Sum('amount'))['amount__sum'] or 0
-        user.part = nb_meals and user.nb_meals / nb_meals * 100 or 0
+        user.part = nb_meals and float(user.nb_meals) / nb_meals * 100 or 0
         user.debt = user.part / 100 * float(expenses)
         user.balance = float(user.payments) - user.debt
 
