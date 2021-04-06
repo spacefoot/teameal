@@ -1,0 +1,4 @@
+[program:teameal_gunicorn]
+user=app
+command={{ ansistrano_deploy_to }}/bin/gunicorn -b 127.0.0.1:8080 -w 2 -t 60 --max-requests 1000 --log-level=info teameal.wsgi:application --chdir {{ ansistrano_deploy_to }}/current
+environment=HOME='{{ ansistrano_deploy_to }}/current/'

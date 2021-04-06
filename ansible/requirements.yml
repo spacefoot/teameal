@@ -1,0 +1,9 @@
+- src: git@github.com:spacefoot/ansible-role-bootstrap.git
+  scm: git
+  name: spacefoot.bootstrap
+  version: master
+- ansistrano.deploy
+- ansistrano.rollback
+- geerlingguy.certbot
+- geerlingguy.mysql
+- geerlingguy.nginx

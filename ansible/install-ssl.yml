@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: true
+  tags:
+    - ssl
+  vars:
+    certbot_admin_email: tech@spacefoot.com
+    certbot_certs:
+      - domains:
+          - "{{ teameal_fqdn }}"
+    certbot_create_if_missing: yes
+    certbot_create_standalone_stop_services:
+      - nginx
+  roles:
+    - geerlingguy.certbot

@@ -1,0 +1,91 @@
+---
+- hosts: all
+  tags:
+    - nginx
+  become: true
+  vars:
+    nginx_server_tokens: "off"
+    nginx_remove_default_vhost: true
+    nginx_vhosts:
+      # Status
+      - listen: "85"
+        server_name: "_"
+        filename: "status.conf"
+        extra_parameters: |
+          location /nginx_status {
+            stub_status on;
+            access_log off;
+            allow 127.0.0.1;
+            deny all;
+          }
+
+      - listen: "80"
+        server_name: "{{ teameal_fqdn }}"
+        filename: "{{ teameal_fqdn }}.80.conf"
+        extra_parameters: |
+          return 301 https://{{ teameal_fqdn }}$request_uri;
+
+      - listen: "443 ssl http2"
+        server_name: "{{ teameal_fqdn }}"
+        filename: "{{ teameal_fqdn }}.443.conf"
+        extra_parameters: |
+          ssl_certificate     /etc/letsencrypt/live/{{ teameal_fqdn }}/fullchain.pem;
+          ssl_certificate_key /etc/letsencrypt/live/{{ teameal_fqdn}}/privkey.pem;
+          ssl_protocols       TLSv1.2 TLSv1.3;
+          ssl_prefer_server_ciphers on;
+
+          location /static {
+              alias {{ ansistrano_deploy_to }}/shared/static;
+          }
+
+          location / {
+              proxy_pass  http://teameal_gunicorn;
+              proxy_redirect off;
+              proxy_buffering off;
+              proxy_store off;
+              proxy_connect_timeout 7200;
+              proxy_send_timeout 7200;
+              proxy_read_timeout 7200;
+              proxy_set_header Host $host;
+              proxy_set_header Accept-Encoding "";
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+          }
+
+    nginx_upstreams:
+      - name: teameal_gunicorn
+        servers: {
+          "127.0.0.1:8080"
+        }
+    nginx_extra_conf_options: |
+      # Fix NGiNX modules load https://github.com/geerlingguy/ansible-role-nginx/issues/200
+      include /etc/nginx/modules-enabled/*;
+    nginx_extra_http_options: |
+      more_clear_headers Server;
+      gzip on;
+      gzip_proxied any;
+      gzip_static on;
+      gzip_http_version 1.0;
+      gzip_disable "MSIE [1-6]\.";
+      gzip_vary on;
+      gzip_comp_level 6;
+      gzip_types
+          text/plain
+          text/css
+          text/xml
+          text/javascript
+          application/javascript
+          application/x-javascript
+          application/json
+          application/xml
+          application/xml+rss
+          application/xhtml+xml
+          application/x-font-ttf
+          application/x-font-opentype
+          image/svg+xml
+          image/x-icon;
+      gzip_buffers 16 8k;
+      gzip_min_length 512;
+  roles:
+    - geerlingguy.nginx

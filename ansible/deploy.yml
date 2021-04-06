@@ -1,0 +1,30 @@
+---
+- name: Deploy
+  hosts: all
+  vars:
+    ansible_user: app
+    ansistrano_deploy_via: "git"
+    ansistrano_git_identity_key_remote_path: ~/.ssh/id_rsa_github_spacefoot_teameal
+    ansistrano_git_repo: "git@github.com:spacefoot/teameal.git"
+    ansistrano_keep_releases: 5
+    ansistrano_after_update_code_tasks_file: "{{ playbook_dir }}/after-update-code-tasks.yml"
+    ansistrano_after_symlink_tasks_file: "{{ playbook_dir }}/after-symlink-tasks.yml"
+
+  tasks:
+    - name: Create deploy key for Github
+      user:
+        name: "{{ ansible_user }}"
+        generate_ssh_key: yes
+        ssh_key_file: "{{ ansistrano_git_identity_key_remote_path }}"
+        force: "{{ new_deploy_key|d(false) }}"
+      register: user
+
+    - name: Add deploy key
+      pause:
+        prompt: "Please add this deploy key to repository {{ ansistrano_git_repo }} for server {{ hostvars[item]['inventory_hostname'] }} ({{ hostvars[item]['inventory_dir']|basename }}):\n\n{{ hostvars[item]['user'].ssh_public_key }}\n\nPress any key to continue"
+      when: hostvars[item]['user'].changed
+      with_items: "{{ play_hosts }}"
+
+    - import_role:
+        name: ansistrano.deploy
+

@@ -1,0 +1,36 @@
+---
+- name: Create config file
+  template:
+    src: templates/django/settings.py.j2
+    dest: "{{ ansistrano_release_path.stdout }}/teameal/settings.py"
+
+- name: Install dependencies (common)
+  pip:
+    requirements: "{{ ansistrano_release_path.stdout }}/requirements.txt"
+    virtualenv: "{{ ansistrano_deploy_to }}"
+    virtualenv_python: python2.7
+
+- name: Install dependencies (prod)
+  pip:
+    requirements: "{{ ansistrano_release_path.stdout }}/requirements-prod.txt"
+    virtualenv: "{{ ansistrano_deploy_to }}"
+    virtualenv_python: python2.7
+
+- name: Apply migrations
+  django_manage:
+    command: migrate
+    app_path: "{{ ansistrano_release_path.stdout }}"
+    virtualenv: "{{ ansistrano_deploy_to }}"
+  ignore_errors: true
+
+# - name: Compile translations
+#   django_manage:
+#     command: compilemessages
+#     app_path: "{{ ansistrano_release_path.stdout }}/
+#     virtualenv: "{{ ansistrano_deploy_to }}"
+
+- name: Collect static
+  django_manage:
+    command: collectstatic
+    app_path: "{{ ansistrano_release_path.stdout }}"
+    virtualenv: "{{ ansistrano_deploy_to }}"

@@ -1,0 +1,20 @@
+---
+- hosts: all
+  become: true
+  tags:
+    - bootstrap
+  vars:
+    bootstrap_apt_packages:
+      - git
+      - libnginx-mod-http-headers-more-filter
+      - python-mysqldb
+      - virtualenv
+    bootstrap_monitoring_group: common
+    bootstrap_app_user_create: true
+    bootstrap_monitoring_roles:
+      - mysql
+      - nginx
+    bootstrap_app_user_sudoers_commands:
+      - "/usr/bin/supervisorctl"
+  roles:
+    - spacefoot.bootstrap

@@ -1,0 +1,3 @@
+---
+- name: Reload Gunicorn
+  shell: sudo supervisorctl pid teameal_gunicorn | xargs kill -HUP

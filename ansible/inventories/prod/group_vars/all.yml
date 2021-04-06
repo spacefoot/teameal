@@ -1,0 +1,19 @@
+bootstrap_admin_user_authorized_keys:
+  - nicolas.charlot
+  - sebastien.cas
+  - alix.leger
+  - quentin.delcourte
+bootstrap_app_user_authorized_keys:
+  - alix.leger
+  - nicolas.charlot
+  - quentin.delcourte
+  - rundeck
+  - sebastien.cas
+bootstrap_firewall_allowed_tcp_ports:
+  - 80
+  - 443
+bootstrap_backup_mysql_db: ["teameal"]
+
+
+ansistrano_deploy_to: "/home/app/public_html/teameal"
+teameal_fqdn: teameal.spacefoot.net

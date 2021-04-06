@@ -1,0 +1,35 @@
+---
+- hosts: all
+  become: true
+  tags:
+    - mysql
+  vars:
+    mysql_databases:
+      - name: teameal
+        encoding: utf8
+        collation: utf8_general_ci
+
+  tasks:
+    - name: Add teameal user
+      set_fact:
+        mysql_users: |
+          {{
+            mysql_users|default([])
+            +
+            [{
+              'name': 'teameal',
+              'host': '127.0.0.1',
+              'password': mysql_teameal_password,
+              'priv': 'teameal.*:ALL'
+            }]
+          }}
+
+    - name: Add extra MySQL settings
+      set_fact:
+        mysql_config_include_files:
+          - src: templates/mysql/extra.cnf
+            force: true
+      when: mysql_extra is defined
+
+    - include_role:
+        name: geerlingguy.mysql
