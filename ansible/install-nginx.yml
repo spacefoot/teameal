@@ -4,6 +4,12 @@
     - nginx
   become: true
   vars:
+    certbot_admin_email: tech@spacefoot.com
+    certbot_certs:
+      - domains:
+          - "{{ teameal_fqdn }}"
+    certbot_create_if_missing: yes
+
     nginx_server_tokens: "off"
     nginx_remove_default_vhost: true
     nginx_vhosts:
@@ -23,7 +29,13 @@
         server_name: "{{ teameal_fqdn }}"
         filename: "{{ teameal_fqdn }}.80.conf"
         extra_parameters: |
-          return 301 https://{{ teameal_fqdn }}$request_uri;
+          location ^~ /.well-known/acme-challenge/ {
+            root /var/www/letsencrypt;
+          }
+
+          location / {
+            return 301 https://{{ teameal_fqdn }}$request_uri;
+          }
 
       - listen: "443 ssl http2"
         server_name: "{{ teameal_fqdn }}"
@@ -33,6 +45,8 @@
           ssl_certificate_key /etc/letsencrypt/live/{{ teameal_fqdn}}/privkey.pem;
           ssl_protocols       TLSv1.2 TLSv1.3;
           ssl_prefer_server_ciphers on;
+
+          add_header Strict-Transport-Security "max-age=63072000" always;
 
           location /static {
               alias {{ ansistrano_deploy_to }}/shared/static;
@@ -87,5 +101,21 @@
           image/x-icon;
       gzip_buffers 16 8k;
       gzip_min_length 512;
-  roles:
-    - geerlingguy.nginx
+
+  tasks:
+    - import_role:
+        name: geerlingguy.certbot
+      vars:
+        certbot_auto_renew: false
+        certbot_create_method: standalone
+        certbot_create_standalone_stop_services: []
+
+    - import_role:
+        name: geerlingguy.nginx
+
+    - import_role:
+        name: geerlingguy.certbot
+      vars:
+        certbot_auto_renew: true
+        certbot_create_method: webroot
+        certbot_webroot: /var/www/letsencrypt

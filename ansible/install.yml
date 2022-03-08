@@ -2,5 +2,4 @@
 - import_playbook: install-bootstrap.yml
 - import_playbook: install-mysql.yml
 - import_playbook: install-supervisor.yml
-- import_playbook: install-ssl.yml
 - import_playbook: install-nginx.yml
