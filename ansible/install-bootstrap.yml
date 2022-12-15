@@ -1,8 +1,6 @@
 ---
 - hosts: all
   become: true
-  tags:
-    - bootstrap
   vars:
     bootstrap_apt_packages:
       - git

@@ -1,1 +1,1 @@
-teameal1 ansible_user=debian ansible_host=135.125.11.98
+teameal1 ansible_user=debian ansible_host=10.10.0.16

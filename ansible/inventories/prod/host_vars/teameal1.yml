@@ -1,4 +1,5 @@
 bootstrap_hostname: teameal1.spacefoot.lan
+bootstrap_bastion_id: teameal1
 bootstrap_vlans:
   monit:
     id: 10
