@@ -6,9 +6,6 @@ bootstrap_vlans:
     ip: "10.10.0.16"
     dev: eno2
 
-bootstrap_feature_flags:
-  use_backup_v2: true
-
 bootstrap_backup_credentials:
   access_key: !vault |
     $ANSIBLE_VAULT;1.2;AES256;prod-admin
